@@ -67,8 +67,11 @@ class Reader():
         with open(output_filename + self.PO_SUFFIX, 'w') as pofile:
             pofile.writelines(['msgid ""\n', 'msgstr ""\n\n'])
             for i in range(start_row, end_row):
-                row_info = [str(j) for j in table.row_values(i)]
-                row1 = '#. ' + row_info[id_column] + ';\n'
-                row2 = 'msgid "' + row_info[en_column] + '"\n'
-                row3 = 'msgstr "' + row_info[ch_column] + '"\n\n'
-                pofile.writelines([row1, row2, row3])
+                # print table.row_values(i)
+                row_info = table.row_values(i)
+                if row_info[id_column] != '' and row_info[en_column] != '':
+                    row1 = '#. ' + str(row_info[id_column]) + ';\n'
+                    row2 = 'msgid "' + str(row_info[en_column].encode('utf-8')) + '"\n'
+                    row3 = 'msgstr "' + str(row_info[ch_column].encode('utf-8')) + '"\n\n'
+                    print [row1, row2, row3]
+                    pofile.writelines([row1, row2, row3])

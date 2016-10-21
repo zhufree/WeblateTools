@@ -18,7 +18,7 @@ class Divider():
         self.dir_name = dir_name
         self.separator = separator
 
-    def cut_po_file(self, output_filename=None, **kwargs):
+    def cut_po_file(self, output_filename, **kwargs):
         """
         :param output_filename: 输出文件名
         :param kwargs: key-value参数，key需要为'byte_length'/'item_count'，来表示字节数或条目数
@@ -34,13 +34,13 @@ class Divider():
                 if i.startswith('#.'):  # 如果以#.开头，表示是一个翻译条目的开始
                     lines = lines[lines.index(i):]
                     break
-
+            
             # 根据输入参数确定按字节或条目数量确定大小
-            if kwargs['byte_length']:
+            if 'byte_length' in kwargs.keys():
                 # 如果是字节数，将package中所有行拼接并计算长度
                 package_size = len(''.join(package))
                 goal_size = kwargs['byte_length']
-            elif kwargs['item_count']:
+            elif 'item_count' in kwargs.keys():
                 # 如果是条目数，直接计算package中所有行，但条目数=行数/4
                 package_size = len(package)
                 goal_size = kwargs['item_count'] * 4
@@ -55,11 +55,13 @@ class Divider():
                 if package_size < goal_size:
                     # 如果不满足大小，往package中再添加一行，继续循环
                     package.append(lines[i])
+                    package_size += 1
                 elif not lines[i].startswith('#.'):
                     # 如果满足了大小，但当前行不是第一行
                     # 说明上一个条目还没有完整结束，依然继续添加
                     # 直到满足大小之后的第一个条目结束
                     package.append(lines[i])
+                    package_size += 1
                 else:
                     # 满足上面两个条件之后，将package中所有行输出到新文件中
                     with open(self.dir_name + output_filename + self.separator + str(file_count) + self.PO_SUFFIX, 'w') \
@@ -68,9 +70,11 @@ class Divider():
                         wf.writelines(package)
                         file_count += 1
                     package = [lines[i]]  # package重置为下一个条目的第一行
+                    package_size = 1
                     
             # 遍历结束后，对不满足大小的剩余行全部输出到最后一个文件中
             with open(self.dir_name + output_filename + self.separator + str(file_count) + self.PO_SUFFIX, 'w') as wf:
+                wf.writelines(['msgid ""\n', 'msgstr ""\n\n'])
                 wf.writelines(package)
 
     def merge_po_file(self, postfix='', input_filename=None, output_filename=None):
