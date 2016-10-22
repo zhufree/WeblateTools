@@ -31,7 +31,15 @@ class Poster(object):
             "language_regex": '^[^.]+$', "_save": '', 'csrfmiddlewaretoken': ''
         }
 
-    def post(num, project_id, comp_name, git_url, filename):
+    def post(self, num, project_id, comp_name, git_url, filename):
+        """
+        :param num: 当前文件的后缀数字，一般用for循环
+        :param project_id: 提交的project的id
+        :param comp_name: component的名称
+        :param git_url: 项目的git地址
+        :param filename: 文件名前缀
+        :return:
+        """
         self.session.headers['Referer'] = self.site_url + "trans/subproject/add/"
         self.settings_dict.update({
                 "name": comp_name + '-' + str(num),
@@ -42,11 +50,11 @@ class Poster(object):
                 "filemask": 'locale/*/' + filename + '-%d.po' % num,
                 'csrfmiddlewaretoken': self.session.cookies['csrftoken']
             })
-        res = self.session.post(self.site_url + 'trans/subproject/add/', settings_dict)
+        res = self.session.post(self.site_url + 'trans/subproject/add/', self.settings_dict)
         print  'send:' + str(num) + str(res)
         # print res.content
 
-    def post_single(comp_name, project_id, git_url, filename):
+    def post_single(self, comp_name, project_id, git_url, filename):
         self.session.headers['Referer'] = self.site_url + 'trans/subproject/add/'
         self.settings_dict.update({
                 "name": comp_name,
